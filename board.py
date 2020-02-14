@@ -11,7 +11,9 @@ GAME_SCALE = 45
 DEFAULT_FONT = pygame.font.get_default_font()
 TEXT_FONT = pygame.font.SysFont(DEFAULT_FONT, (GAME_SCALE*3)//4)
 TEXT_FONT_SMALL = pygame.font.SysFont(DEFAULT_FONT, (GAME_SCALE)//2)
-BACKGROUND = "warcry-1.png"
+BACKGROUND = None
+if len(sys.argv) >= 2:
+    BACKGROUND=sys.argv[1]
 
 def dist(origin, dest):
     return math.hypot(dest[0] - origin[0], dest[1] - origin[1])
