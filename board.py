@@ -6,6 +6,7 @@ if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
 
 pygame.init()
+random.seed()
 
 GAME_SCALE = 45
 DEFAULT_FONT = pygame.font.get_default_font()
@@ -24,14 +25,7 @@ def average(origin, dest):
 class Game:
     def __init__(self, screen):
         self.screen = screen
-        self.dudes = []
-        self.terrain = []
-        self.selection = None
-        self.line = None
-        self.edit = False
-        self.drag = False
-        self.roll = None
-        self.click = time.time()
+        self.clear()
         if BACKGROUND is None:
             self.background = pygame.Surface(self.screen.get_size())
             self.background = self.background.convert()
@@ -41,6 +35,17 @@ class Game:
             self.background.convert()
             self.background = pygame.transform.scale(self.background, self.screen.get_size())
 
+    def clear(self):
+        self.dudes = []
+        self.terrain = []
+        self.selection = None
+        self.line = None
+        self.edit = False
+        self.drag = False
+        self.roll = []
+        self.multiplier = 1
+        self.click = time.time()
+
     def start(self):
         clock = pygame.time.Clock()
         while True:
@@ -48,14 +53,14 @@ class Game:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
-                elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    return
                 elif event.type == KEYDOWN and self.edit:
-                    if event.key == K_RETURN:
+                    if event.key == K_RETURN or event.key == K_ESCAPE:
                         self.edit = False
                         self.selection = None
                     else:
                         self.selection.send_key(event.key)
+                elif event.type == KEYDOWN and event.key == K_c and event.mod & KMOD_CTRL:
+                    self.clear()
                 elif event.type == KEYDOWN and event.key == K_r:
                     self.create_dude((255,0,0))
                 elif event.type == KEYDOWN and event.key == K_g:
@@ -65,7 +70,9 @@ class Game:
                 elif event.type == KEYDOWN and (event.key == K_DELETE or event.key == K_BACKSPACE):
                     self.delete_selection()
                 elif event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_d):
-                    self.roll = random.randint(1,6)
+                    self.roll = [random.randint(1,6) for _ in range(self.multiplier)]
+                elif event.type == KEYDOWN and K_0 <= event.key <= K_9:
+                    self.multiplier = int(pygame.key.name(event.key))
                 elif event.type == MOUSEBUTTONDOWN and event.button == 3:
                     if self.line is None:
                         self.line = pygame.mouse.get_pos()
@@ -118,10 +125,10 @@ class Game:
             self.screen.blit(txt, dest)
 
     def draw_roll(self):
-        if self.roll is not None:
-            pos = (self.screen.get_width() - GAME_SCALE, GAME_SCALE)
-            txt = TEXT_FONT.render(str(self.roll), True, (0,0,0))
-            self.screen.blit(txt, pos)
+        roll = ",".join(map(str, self.roll))
+        txt = TEXT_FONT.render(roll, True, (0,0,0))
+        pos = (self.screen.get_width() - GAME_SCALE - txt.get_width(), GAME_SCALE)
+        self.screen.blit(txt, pos)
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
@@ -152,7 +159,7 @@ class Dude:
     def send_key(self, key):
         if key == K_DELETE:
             self.name = ""
-        elif key >= K_a and key <= K_z:
+        elif K_a <= key <= K_z or K_0 <= key <= K_9:
             self.name += pygame.key.name(key)
 
     def move(self, pos):
