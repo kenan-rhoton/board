@@ -133,7 +133,7 @@ class Game:
     def draw(self):
         self.screen.blit(self.background, (0, 0))
         for dude in self.dudes:
-            dude.draw(self.screen)
+            dude.draw(self.screen, dude == self.selection)
         self.draw_ruler()
         self.draw_roll()
         pygame.display.flip()
@@ -144,8 +144,11 @@ class Dude:
         self.color = color
         self.name = ""
 
-    def draw(self, screen):
+    def draw(self, screen, border = False):
         pygame.draw.circle(screen, self.color, self.pos, GAME_SCALE//2)
+        if border:
+            pygame.draw.circle(screen, (0,0,0), self.pos, GAME_SCALE//2, 1)
+
         txt = TEXT_FONT_SMALL.render(self.name.upper(), True, (0,0,0))
         text_pos = (self.pos[0] - txt.get_width()//2, self.pos[1] - txt.get_height()//2)
         screen.blit(txt, text_pos)
