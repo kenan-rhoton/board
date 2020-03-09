@@ -74,8 +74,7 @@ class Game:
                 elif event.type == KEYDOWN and K_0 <= event.key <= K_9:
                     self.multiplier = int(pygame.key.name(event.key))
                 elif event.type == MOUSEBUTTONDOWN and event.button == 3:
-                    if self.line is None:
-                        self.line = pygame.mouse.get_pos()
+                    self.line = pygame.mouse.get_pos()
                 elif event.type == MOUSEBUTTONUP and event.button == 3:
                     self.line = None
                 elif event.type == MOUSEBUTTONDOWN and event.button == 1:
